@@ -8,8 +8,6 @@ Buzzer::Buzzer(uint8_t buzzerPin) :
     doubleBeepInterval(200),    // 默认双响间隔200ms
     isBeeping(false),
     beepCount(0) {
-    pinMode(pin, OUTPUT);
-    digitalWrite(pin, LOW);
 }
 
 void Buzzer::setState(State newState) {
@@ -21,10 +19,10 @@ void Buzzer::setState(State newState) {
         
         // 如果切换到常响或关闭状态，立即更新蜂鸣器
         if (newState == ON) {
-            digitalWrite(pin, HIGH);
+            tone(pin, 2000);  // 2000Hz的声音
             isBeeping = true;
         } else if (newState == OFF) {
-            digitalWrite(pin, LOW);
+            noTone(pin);
             isBeeping = false;
         }
     }
@@ -55,11 +53,11 @@ void Buzzer::updateSingleBeep() {
     
     if (currentTime - lastUpdateTime >= doubleBeepInterval) {
         if (beepCount == 0) {
-            digitalWrite(pin, HIGH);
+            tone(pin, 2000);  // 2000Hz的声音
             isBeeping = true;
             beepCount++;
         } else if (beepCount == 1) {
-            digitalWrite(pin, LOW);
+            noTone(pin);
             isBeeping = false;
             beepCount = 0;
             setState(OFF);  // 完成单响后关闭
@@ -74,19 +72,19 @@ void Buzzer::updateDoubleBeep() {
     if (currentTime - lastUpdateTime >= doubleBeepInterval) {
         switch (beepCount) {
             case 0:  // 第一次响
-                digitalWrite(pin, HIGH);
+                tone(pin, 2000);
                 isBeeping = true;
                 break;
             case 1:  // 第一次停
-                digitalWrite(pin, LOW);
+                noTone(pin);
                 isBeeping = false;
                 break;
             case 2:  // 第二次响
-                digitalWrite(pin, HIGH);
+                tone(pin, 2000);
                 isBeeping = true;
                 break;
             case 3:  // 第二次停
-                digitalWrite(pin, LOW);
+                noTone(pin);
                 isBeeping = false;
                 beepCount = -1;  // 重置计数
                 setState(OFF);  // 完成双响后关闭
@@ -101,8 +99,12 @@ void Buzzer::updateContinuousBeep() {
     unsigned long currentTime = millis();
     
     if (currentTime - lastUpdateTime >= continuousInterval) {
+        if (!isBeeping) {
+            tone(pin, 2000);
+        } else {
+            noTone(pin);
+        }
         isBeeping = !isBeeping;
-        digitalWrite(pin, isBeeping ? HIGH : LOW);
         lastUpdateTime = currentTime;
     }
 } 

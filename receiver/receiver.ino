@@ -13,7 +13,7 @@ Motor rightMotor(6);   // 右电机PWM引脚
 
 // 控制数据结构
 struct ControlData {
-    int8_t throttle;    // 油门值 (-100 到 100)
+    int8_t throttle;    // 油门值 (0 到 100)
     int8_t direction;   // 方向值 (-100 到 100)
 } controlData;
 
@@ -94,12 +94,12 @@ void loop() {
 
 // 计算左右电机速度
 void calculateMotorSpeeds(int throttle, int direction, int& leftSpeed, int& rightSpeed) {
-    // 将油门和方向值限制在-100到100范围内
-    throttle = constrain(throttle, -100, 100);
+    // 将油门限制在0到100范围内，方向限制在-100到100范围内
+    throttle = constrain(throttle, 0, 100);
     direction = constrain(direction, -100, 100);
     
-    // 将throttle从-100~100映射到0~100的实际电机速度
-    int actualThrottle = map(throttle, -100, 100, 0, 100);
+    // 直接使用throttle作为实际油门值（因为已经是0~100范围）
+    int actualThrottle = throttle;
     
     // 在高速时增加转向效果（实际油门大于75%时）
     if (actualThrottle > 75) {
@@ -135,9 +135,8 @@ void calculateMotorSpeeds(int throttle, int direction, int& leftSpeed, int& righ
     rightSpeed = constrain(rightSpeed, 0, 100);
     
     // 调试输出
-    DEBUG_PRINTF("接收数据 - 油门: %d(%d), 方向: %d -> 左电机: %d%%, 右电机: %d%%\n", 
+    DEBUG_PRINTF("接收数据 - 油门: %d, 方向: %d -> 左电机: %d%%, 右电机: %d%%\n", 
         throttle, 
-        actualThrottle,
         direction,
         leftSpeed,
         rightSpeed);
